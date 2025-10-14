@@ -1,0 +1,1 @@
+ALTER TABLE "renewal_events" ADD COLUMN "vendor_name" text;

@@ -1,0 +1,1 @@
+ALTER TABLE "agreements" ADD COLUMN "products" json DEFAULT '[]'::json;

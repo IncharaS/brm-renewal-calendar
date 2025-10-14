@@ -1,0 +1,1 @@
+ALTER TABLE "renewal_events" ADD COLUMN "renewal_term_months" integer DEFAULT 12;
