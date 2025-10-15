@@ -6,7 +6,12 @@ import { computeRenewalEvents } from "@/lib/dateUtils";
 import { addMonths } from "date-fns";
 
 export const dynamic = "force-dynamic";
-
+function authorize(req: Request) {
+    const auth = req.headers.get("Authorization");
+    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+}
 // Utility: Pacific now
 function pacificNow(): Date {
     const now = new Date();
@@ -28,7 +33,10 @@ function pacificNow(): Date {
  * - Checks all agreements where autoRenews=true
  * - If last "info" event passed, creates next cycle events
  */
-export async function GET() {
+export async function GET(req: Request) {
+    const authError = authorize(req);
+    if (authError) return authError;
+    if (authError) return authError;
     try {
         const today = pacificNow();
 

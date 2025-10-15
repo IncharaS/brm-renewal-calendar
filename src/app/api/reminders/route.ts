@@ -6,6 +6,12 @@ import { eq, and, gt } from "drizzle-orm";
 import { differenceInCalendarDays, startOfDay } from "date-fns";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+function authorize(req: Request) {
+    const auth = req.headers.get("Authorization");
+    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+}
 // Helper: get current logged-in user + email
 async function getCurrentUserEmail(): Promise<{ userId: string; email: string } | null> {
     const { userId } = await auth();
@@ -20,7 +26,9 @@ async function getCurrentUserEmail(): Promise<{ userId: string; email: string } 
 }
 
 export async function GET(req: Request) {
-    console.log(req);
+    const authError = authorize(req);
+    if (authError) return authError;
+    // console.log(req);
     try {
         const current = await getCurrentUserEmail();
         if (!current) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
