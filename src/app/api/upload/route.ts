@@ -34,7 +34,12 @@ export async function POST(req: Request) {
         console.log("[2] Fetching:", fileUrl);
 
         const res = await fetch(fileUrl);
-        if (!res.ok) throw new Error(`Failed to fetch S3 file: ${res.statusText}`);
+        if (!res.ok) {
+            return NextResponse.json(
+                { success: false, message: `Failed to fetch S3 file: ${res.statusText}` },
+                { status: 400 }
+            );
+        }
 
         const buffer = Buffer.from(await res.arrayBuffer());
         console.log("[3] Downloaded:", buffer.length, "bytes");
@@ -44,10 +49,14 @@ export async function POST(req: Request) {
 
         if (!text || text.trim().length < 50) {
             console.error("Extraction returned empty or too short text");
-            return NextResponse.json({
-                success: false,
-                message: "Sorry, this PDF may be corrupted or unreadable. Please try again.",
-            });
+            // EARLY RETURN ensures function stops here
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Sorry, this PDF may be corrupted or unreadable. Please try again.",
+                },
+                { status: 400 }
+            );
         }
 
         console.log("[4] Final extracted text length:", text.length);
@@ -63,9 +72,7 @@ export async function POST(req: Request) {
                 userId,
                 vendorName: fields.vendor_name || "Unknown Vendor",
                 title: fields.title || file_name,
-                effectiveDate: fields.effective_date
-                    ? new Date(fields.effective_date)
-                    : null,
+                effectiveDate: fields.effective_date ? new Date(fields.effective_date) : null,
                 initialTermMonths: fields.initial_term_months ?? null,
                 autoRenews: fields.auto_renews ?? false,
                 renewalTermMonths: fields.renewal_term_months ?? null,
@@ -103,9 +110,9 @@ export async function POST(req: Request) {
             }));
 
             await db.insert(renewalEvents).values(enriched);
-            console.log("[8] ✅ Events inserted successfully");
+            console.log("[8] Events inserted successfully");
         } else {
-            console.log("[8] ⚠️ No renewal events computed - check extraction results");
+            console.log("[8] No renewal events computed - check extraction results");
         }
 
         return NextResponse.json({ success: true, agreementId: agreement.id });

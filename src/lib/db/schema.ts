@@ -30,6 +30,7 @@ export const renewalEvents = pgTable("renewal_events", {
   vendorName: text("vendor_name"),
   autoRenews: boolean("auto_renews").default(false),
   isResolved: boolean("is_resolved").default(false),
+  status: text("status"),
   renewalTermMonths: integer("renewal_term_months").default(12),
   lastReminderSent: timestamp("last_reminder_sent"),
 });

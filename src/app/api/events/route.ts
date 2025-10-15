@@ -23,6 +23,7 @@ export async function GET() {
                 fileKey: agreements.sourceFile,
                 products: agreements.products,
                 autoRenews: renewalEvents.autoRenews,
+                status: renewalEvents.status,
             })
             .from(renewalEvents)
             .leftJoin(agreements, eq(renewalEvents.agreementId, agreements.id))
@@ -47,7 +48,7 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ success: true, updated: "isDone" });
         }
 
-        //  Manual Renew
+        // Manual Renew
         if (action === "renew") {
             const original = await db.query.renewalEvents.findFirst({
                 where: eq(renewalEvents.id, id),
@@ -55,6 +56,14 @@ export async function PATCH(req: Request) {
             if (!original) throw new Error("Event not found");
 
             const nextDate = addMonths(original.eventDate, 12);
+
+            // 1️⃣ Mark current event as renewed
+            await db
+                .update(renewalEvents)
+                .set({ status: "renewed" })
+                .where(eq(renewalEvents.id, id));
+
+            // 2️⃣ Insert next renewal event
             await db.insert(renewalEvents).values({
                 agreementId: original.agreementId,
                 title: `Renewal - ${format(nextDate, "PPP")}`,
@@ -70,7 +79,11 @@ export async function PATCH(req: Request) {
 
         // Cancel Auto-Renew
         if (action === "cancel_auto") {
-            await db.update(renewalEvents).set({ autoRenews: false }).where(eq(renewalEvents.id, id));
+            await db
+                .update(renewalEvents)
+                .set({ autoRenews: false, status: "canceled" }) // <-- persist status
+                .where(eq(renewalEvents.id, id));
+
             return NextResponse.json({ success: true, canceled: true });
         }
 

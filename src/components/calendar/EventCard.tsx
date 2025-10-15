@@ -18,13 +18,26 @@ export default function EventCard({ event, onChange }: any) {
         : null;
 
     // Detect expired events
+    // useEffect(() => {
+    //     const eventDate = new Date(event.eventDate);
+    //     const today = new Date();
+    //     if (eventDate < today && !event.isDone) {
+    //         setStatus("expired");
+    //     }
+    // }, [event.eventDate, event.isDone]);
+    // Detect status and expired state
     useEffect(() => {
-        const eventDate = new Date(event.eventDate);
-        const today = new Date();
-        if (eventDate < today && !event.isDone) {
-            setStatus("expired");
+        if (event.status) {
+            setStatus(event.status); // Load persisted status (renewed/canceled)
+        } else {
+            const eventDate = new Date(event.eventDate);
+            const today = new Date();
+            if (eventDate < today && !event.isDone) {
+                setStatus("expired");
+            }
         }
-    }, [event.eventDate, event.isDone]);
+    }, [event.status, event.eventDate, event.isDone]);
+
 
     // Handle renew / cancel
     const handleAction = async (type: "renew" | "cancel_auto") => {
@@ -34,14 +47,14 @@ export default function EventCard({ event, onChange }: any) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: event.id, action: type }),
             });
-
             setStatus(type === "renew" ? "renewed" : "canceled");
-            onChange?.(); // refresh
+            onChange?.(); // refresh parent list
         } catch (err) {
             console.error("Action failed:", err);
             alert("Failed to perform action.");
         }
     };
+
 
     // Delete event
     const handleDelete = async () => {

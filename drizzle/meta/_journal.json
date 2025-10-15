@@ -57,6 +57,13 @@
       "when": 1760396074844,
       "tag": "0007_glossy_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1760505690007,
+      "tag": "0008_dear_revanche",
+      "breakpoints": true
     }
   ]
 }

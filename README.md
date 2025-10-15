@@ -22,7 +22,7 @@ The backend leverages **Next.js Server Actions** and **Drizzle ORM** connected t
 
 The **PostgreSQL database** ensures relational consistency, foreign-key safety between agreements and renewal events, and efficient time-based indexing for scheduling.
 
-All uploaded files are stored securely in **AWS S3**, using pre-signed URLs for direct client access.
+All uploaded files are stored securely in **AWS S3**.
 
 AI-driven metadata extraction is powered by **OpenRouter** OpenAI Chat Completions API with GPT-4 to transform parsed PDF text into structured JSON.
 
@@ -95,6 +95,9 @@ A multi-stage PDF extraction pipeline was implemented to handle diverse document
 
 For field extraction, AI-based methods were chosen over regular expressions due to their superior adaptability to differing layouts and clause phrasing. The added API cost and latency were acceptable given the importance of accuracy and the low frequency of uploads.
 
+View PDF Button fetches the PDFs from S3 directly, and not with presigned URL.
+Works well for MVP demos where uploads are small (< 5 MB). Allows direct PDF rendering in the browser without extra API calls.
+
 Serverless cron jobs were selected instead of a self-hosted scheduler to reduce infrastructure complexity. While this limits granularity to daily intervals, it provides strong security and low maintenance overhead.
 
 All time computations were normalized to the **America/Los_Angeles** timezone to match BRM’s business logic and eliminate off-by-one-day errors caused by UTC conversions.
@@ -143,13 +146,15 @@ Then visit `http://localhost:3000` in your browser.
 ## **Future Enhancements**
 Editable agreement fields for manual corrections, and role-based access control for multi-tenant organizations.
 Comment/Notes fields in the shared events.
-Planned next steps include adding dashboard analytics for renewal density and risk visualization.
+Presigned S3 URL - The backend issues a temporary URL (valid for e.g., 5 minutes) signed with AWS credentials. The client uploads directly to S3 without passing through the backend. S3 notifies the server (or the client does so) once the upload succeeds. Faster uploads and more secure.
+Dashboard analytics for renewal density and risk visualization.
 Other priorities include a document validation layer using OpenAI function calling, an audit log and activity feed, and integrations with external platforms such as Google Calendar, Slack, and Salesforce.
 
 ---
 ## What I Deferred (Intentionally)
 
 OCR Pipeline: While planned (tesseract.js), the provided PDFs were already text-based. Excluding OCR kept the stack lightweight and reliable.
+AWS S3: As mentioned above, currently the implementation is simple - no presigned URL generation or signature validation.Works well for MVP demos where uploads are small (< 5 MB). Allows direct PDF rendering in the browser without extra API calls.
 Advanced Analytics: KPIs and trend dashboards were deferred to focus on correct date logic.
 Collaborative User Roles: Role-based access and org hierarchies can extend from Clerk later.
 Multi-LLM Fallback: GPT-4 proved sufficient; adding Claude/Gemini switching was out of scope for an MVP.
