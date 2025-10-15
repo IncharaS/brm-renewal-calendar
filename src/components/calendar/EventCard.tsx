@@ -12,7 +12,7 @@ export default function EventCard({ event, onChange }: any) {
     const [status, setStatus] = useState<"renewed" | "canceled" | "expired" | null>(
         null
     );
-
+    // console.log(event);
     const pdfUrl = event.fileKey
         ? `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_S3_AWS_REGION}.amazonaws.com/${event.fileKey}`
         : null;

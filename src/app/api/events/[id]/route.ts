@@ -102,13 +102,13 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ ok: true, message: "Auto-renew cancelled" });
         }
 
-        if (action === "resolve") {
-            await db
-                .update(renewalEvents)
-                .set({ isResolved: true })
-                .where(eq(renewalEvents.id, id));
-            return NextResponse.json({ ok: true, message: "Resolved" });
-        }
+        // if (action === "resolve") {
+        //     await db
+        //         .update(renewalEvents)
+        //         .set({ isResolved: true })
+        //         .where(eq(renewalEvents.id, id));
+        //     return NextResponse.json({ ok: true, message: "Resolved" });
+        // }
 
         return NextResponse.json({ ok: true });
     } catch (e: any) {

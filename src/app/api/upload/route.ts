@@ -72,6 +72,7 @@ export async function POST(req: Request) {
                 noticePeriodDays: fields.notice_period_days ?? null,
                 rawText: text,
                 sourceFile: file_key,
+                products: fields.products,
             })
             .returning({ id: agreements.id });
 
